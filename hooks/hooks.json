@@ -1,0 +1,33 @@
+{
+  "description": "Carrega guardrails e memória operacional do GestãoX.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.PLUGIN_ROOT||process.env.CLAUDE_PLUGIN_ROOT;if(!r)process.exit(1);import(u.pathToFileURL(p.resolve(r,'hooks','context.mjs')).href).catch(e=>{console.error(e);process.exit(1)})\"",
+            "commandWindows": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.PLUGIN_ROOT||process.env.CLAUDE_PLUGIN_ROOT;if(!r)process.exit(1);import(u.pathToFileURL(p.resolve(r,'hooks','context.mjs')).href).catch(e=>{console.error(e);process.exit(1)})\"",
+            "timeout": 5,
+            "statusMessage": "Carregando contexto do GestãoX",
+            "additionalContextLimit": 1800
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.PLUGIN_ROOT||process.env.CLAUDE_PLUGIN_ROOT;if(!r)process.exit(1);import(u.pathToFileURL(p.resolve(r,'hooks','context.mjs')).href).catch(e=>{console.error(e);process.exit(1)})\"",
+            "commandWindows": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.PLUGIN_ROOT||process.env.CLAUDE_PLUGIN_ROOT;if(!r)process.exit(1);import(u.pathToFileURL(p.resolve(r,'hooks','context.mjs')).href).catch(e=>{console.error(e);process.exit(1)})\"",
+            "timeout": 5,
+            "additionalContextLimit": 1200
+          }
+        ]
+      }
+    ]
+  }
+}

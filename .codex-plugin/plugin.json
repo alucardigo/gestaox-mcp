@@ -1,0 +1,27 @@
+{
+  "name": "gestaox-atendimento",
+  "version": "0.1.0",
+  "description": "Analisa, atende e movimenta chamados do Gest\u00e3oX e prepara tickets rastre\u00e1veis para o Azure DevOps.",
+  "author": {
+    "name": "alucardigo"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Gest\u00e3oX Atendimento",
+    "shortDescription": "Triagem de chamados e integra\u00e7\u00e3o com Azure DevOps",
+    "longDescription": "Ajuda a consultar, analisar, validar, responder e movimentar chamados do Gest\u00e3oX com confirma\u00e7\u00e3o nas escritas e convers\u00e3o rastre\u00e1vel para o Azure DevOps.",
+    "developerName": "alucardigo",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Analise meus chamados pendentes no Gest\u00e3oX.",
+      "Prepare uma resposta para este chamado.",
+      "Transforme este chamado em ticket do Azure DevOps."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

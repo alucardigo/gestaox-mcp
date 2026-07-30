@@ -1,0 +1,16 @@
+# Dependências
+node_modules/
+
+# Segredos e estado local — NUNCA versionar
+.env
+.env.*
+runtime/
+session.json
+browser-profile/
+routes.local.json
+*.local.json
+
+# Logs e temporários
+*.log
+.DS_Store
+Thumbs.db

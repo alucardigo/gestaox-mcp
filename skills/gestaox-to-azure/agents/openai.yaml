@@ -1,0 +1,5 @@
+﻿interface:
+  display_name: "GestãoX para Azure DevOps"
+  short_description: "Converte chamados em tickets rastreáveis"
+  default_prompt: "Use $gestaox-to-azure para transformar este chamado em um ticket do Azure DevOps."
+

@@ -1,0 +1,5 @@
+﻿interface:
+  display_name: "Triagem GestãoX"
+  short_description: "Analisa e conduz chamados do GestãoX"
+  default_prompt: "Use $gestaox-triage para analisar este chamado e preparar o próximo atendimento."
+

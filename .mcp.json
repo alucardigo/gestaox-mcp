@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "gestaox": {
+      "command": "node",
+      "args": [
+        "-e",
+        "const p=require('node:path'),u=require('node:url'),fs=require('node:fs');const r=process.env.PLUGIN_ROOT||process.env.CLAUDE_PLUGIN_ROOT;if(!r){console.error('PLUGIN_ROOT is not set');process.exit(1)}const f=p.resolve(r,'server','src','index.mjs');if(!fs.existsSync(f)){console.error('GestaoX MCP not found at '+f);process.exit(1)};import(u.pathToFileURL(f).href).catch(e=>{console.error(e);process.exit(1)})"
+      ],
+      "env": {
+        "GESTAOX_BACKEND": "mock",
+        "GESTAOX_WEB_URL": "https://gestaox.example.com"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "gestaox-atendimento-mcp",
+  "version": "0.1.0",
+  "description": "Servidor MCP para atender chamados do GestãoX (EMX) e preparar tickets do Azure DevOps.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.mjs",
+    "login": "node src/login.mjs",
+    "test": "node --test",
+    "inspect": "npx @modelcontextprotocol/inspector node src/index.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "playwright-core": "^1.62.0",
+    "zod": "^3.25.76"
+  }
+}
