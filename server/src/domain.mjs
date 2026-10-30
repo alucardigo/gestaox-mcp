@@ -99,6 +99,19 @@ export function parseSlaPercent(value) {
   return match ? Number(match[1].replace(",", ".")) : null;
 }
 
+// Com SLA > 100% a tela de Detalhes só salva com "Justificativa do estouro do Sla" (#edtJustificativa);
+// sem ela o Salvar não grava nada. Barrar antes de abrir a tela dá erro claro em vez de "não confirmada".
+export function assertSlaJustification(sla, justificativa) {
+  const percent = parseSlaPercent(sla);
+  if (percent !== null && percent > 100 && !clean(justificativa)) {
+    throw new Error(`SLA do chamado em ${percent}%: o GestãoX exige justificativaSla para salvar.`);
+  }
+}
+
+export function isSlaBlockMessage(text) {
+  return /SLA do chamado est[aá] acima de 100%/i.test(clean(text));
+}
+
 function isClosed(status) {
   return /^(fechado|resolvido|conclu[ií]do|done)$/i.test(clean(status));
 }

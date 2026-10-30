@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { analyzeTicket, assertWriteAuthorized, prepareAzureWorkItem, sanitizeMemory, parseTicketDate, parseSlaPercent } from "../src/domain.mjs";
+import { analyzeTicket, assertWriteAuthorized, prepareAzureWorkItem, sanitizeMemory, parseTicketDate, parseSlaPercent, assertSlaJustification, isSlaBlockMessage } from "../src/domain.mjs";
 
 // Regressão: o GestãoX entrega data pt-BR. `new Date("21/05/2026")` é Invalid Date,
 // o que fazia TODO chamado atrasado ser reportado como em dia.
@@ -18,6 +18,23 @@ test("parseSlaPercent lê o percentual da grade", () => {
   assert.equal(parseSlaPercent("621%"), 621);
   assert.equal(parseSlaPercent("80%"), 80);
   assert.equal(parseSlaPercent(""), null);
+});
+
+// Regressão (2026-10-30): com SLA > 100% a tela de Detalhes só salva com
+// "Justificativa do estouro do Sla" preenchida; sem ela o Salvar não grava e o erro virava "não confirmada".
+test("assertSlaJustification barra SLA estourado sem justificativa, antes de abrir a tela", () => {
+  assert.throws(() => assertSlaJustification("200%", ""), /justificativaSla/);
+  assert.throws(() => assertSlaJustification("100,5%", "   "), /justificativaSla/);
+  assert.doesNotThrow(() => assertSlaJustification("200%", "Fila acumulada; tratado em 30/10."));
+  assert.doesNotThrow(() => assertSlaJustification("100%", ""));
+  assert.doesNotThrow(() => assertSlaJustification("69%", ""));
+  assert.doesNotThrow(() => assertSlaJustification("", ""), "SLA desconhecido não bloqueia; o aviso da tela cobre");
+});
+
+test("isSlaBlockMessage reconhece o aviso real da tela de Detalhes", () => {
+  assert.equal(isSlaBlockMessage("O SLA do chamado está acima de 100%, favor preencher o campo justificativa do estouro do SLA!"), true);
+  assert.equal(isSlaBlockMessage("Chamado salvo com sucesso"), false);
+  assert.equal(isSlaBlockMessage(null), false);
 });
 
 test("chamado com previsão vencida em pt-BR é atrasado e prioritário", () => {
