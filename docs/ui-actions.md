@@ -82,6 +82,16 @@ mensagem de erro manda conferir no GestãoX antes de repetir.
 Campos obrigatórios da tela: **descrição**, **grupo responsável**, e **previsão OU
 estimativa de tempo**. O campo de tempo é numérico simples (minutos): `"00:05"` vira `"000"`.
 
+**4. SLA acima de 100% exige justificativa (2026-10-30).** Na tela de Detalhes
+(`viewVisualizaChamados.aspx`), com o SLA do chamado acima de 100% o Salvar não grava nada e mostra no
+topo *"O SLA do chamado está acima de 100%, favor preencher o campo justificativa do estouro do SLA!"*.
+Não é `Page_Validators` nem dialog, então antes isso aparecia só como "não confirmada após ~15s"
+(dois chamados com SLA estourado falharam 3× cada; um com SLA em 69% gravou de primeira).
+O campo é a textarea `#edtJustificativa`, e `page.fill` funciona nela. `gestaox_comment_ticket` e
+`gestaox_resolve_ticket` aceitam `justificativaSla`. O `updateTicket` barra antes de abrir a tela quando o
+SLA da grade passa de 100% sem justificativa (`assertSlaJustification`) e, se o aviso aparecer mesmo
+assim, falha com mensagem clara (`isSlaBlockMessage`) em vez de esperar a releitura do histórico.
+
 ## Histórico da investigação (obstáculo original)
 
 Tela `viewInsereAtividade.aspx` (registrar andamento) — a ação central do atendimento.

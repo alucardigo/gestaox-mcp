@@ -10,6 +10,8 @@ const memory = new OperationalMemory(process.env.GESTAOX_DATA_DIR || new URL("..
 const server = new McpServer({ name: "gestaox-atendimento", version: "0.2.0" });
 
 const ticketId = z.string().min(1).describe("Código exato do chamado GestãoX (ex.: MIP000009028).");
+const justificativaSla = z.string().max(4000).optional()
+  .describe("Justificativa do estouro do SLA. Obrigatória quando o SLA do chamado passa de 100% — sem ela o GestãoX não salva.");
 const writeGuard = {
   confirmed: z.literal(true).describe("Confirmação explícita do usuário após revisar a prévia."),
   idempotencyKey: z.string().min(8).max(128).describe("Chave única e estável para impedir escrita duplicada.")
@@ -75,13 +77,14 @@ server.registerTool("gestaox_comment_ticket", {
     ticketId,
     comentario: z.string().min(1).max(8000).describe("Texto do andamento."),
     interno: z.boolean().default(false).describe("Comentário interno (só responsáveis) em vez de público."),
+    justificativaSla,
     dryRun: z.boolean().default(false),
     ...writeGuard
   },
   annotations: write
-}, async ({ ticketId, comentario, interno, dryRun, ...guard }) => {
+}, async ({ ticketId, comentario, interno, justificativaSla, dryRun, ...guard }) => {
   if (typeof backend.updateTicket !== "function") throw new Error("Use GESTAOX_BACKEND=web.");
-  return result(await backend.updateTicket(ticketId, { comentario, interno, dryRun, ...guard }));
+  return result(await backend.updateTicket(ticketId, { comentario, interno, justificativaSla, dryRun, ...guard }));
 });
 
 server.registerTool("gestaox_resolve_ticket", {
@@ -91,13 +94,14 @@ server.registerTool("gestaox_resolve_ticket", {
     status: z.string().min(1).describe("Novo status exato (ex.: RESOLVIDO)."),
     comentario: z.string().min(1).max(8000).describe("Descrição da resolução/mudança."),
     interno: z.boolean().default(false),
+    justificativaSla,
     dryRun: z.boolean().default(false),
     ...writeGuard
   },
   annotations: write
-}, async ({ ticketId, status, comentario, interno, dryRun, ...guard }) => {
+}, async ({ ticketId, status, comentario, interno, justificativaSla, dryRun, ...guard }) => {
   if (typeof backend.updateTicket !== "function") throw new Error("Use GESTAOX_BACKEND=web.");
-  return result(await backend.updateTicket(ticketId, { status, comentario, interno, dryRun, ...guard }));
+  return result(await backend.updateTicket(ticketId, { status, comentario, interno, justificativaSla, dryRun, ...guard }));
 });
 
 server.registerTool("gestaox_add_activity", {

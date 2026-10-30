@@ -1,5 +1,5 @@
 import { BrowserSession } from "./browser-session.mjs";
-import { assertWriteAuthorized } from "./domain.mjs";
+import { assertWriteAuthorized, assertSlaJustification, isSlaBlockMessage } from "./domain.mjs";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
@@ -472,6 +472,7 @@ export class WebBackend {
       const ticket = await this.get(id);
       const hd = ticket._actions;
       if (!hd?.encryptedId) throw new Error(`Sem handle de ação para o chamado ${id}.`);
+      assertSlaJustification(ticket.sla, input.justificativaSla);
 
       const page = await this.session.open(ACTION_URLS.detalhe({
         id: hd.encryptedId, codigo: hd.codigo || id, servicoId: hd.servicoId,
@@ -501,6 +502,9 @@ export class WebBackend {
             .catch(async () => { await frame.click("#edtDescPublica"); await frame.locator("#edtDescPublica").pressSequentially(input.comentario, { delay: 3 }); });
         }
 
+        // "Justificativa do estouro do Sla": obrigatória quando o SLA passa de 100%.
+        if (clean(input.justificativaSla)) await frame.fill("#edtJustificativa", input.justificativaSla);
+
         // Novo status (combo Telerik: item.select dispara postback).
         if (clean(input.status)) {
           const existe = await set(`(function(){var c=$find("rdStatus");if(!c)return {e:"nocombo"};if(c.findItemByText(${JSON.stringify(input.status)}))return {ok:1};var a=[],it=c.get_items();for(var i=0;i<Math.min(it.get_count(),12);i++)a.push(it.getItem(i).get_text());return {e:"notfound",a:a};})()`);
@@ -509,13 +513,18 @@ export class WebBackend {
         }
 
         if (input.dryRun) {
-          const estado = await set(`(function(){return {status:$find("rdStatus")?$find("rdStatus").get_text():null, comentario:(document.getElementById("edtDescPublica")||{}).value};})()`);
+          const estado = await set(`(function(){return {status:$find("rdStatus")?$find("rdStatus").get_text():null, comentario:(document.getElementById("edtDescPublica")||{}).value, justificativaSla:(document.getElementById("edtJustificativa")||{}).value};})()`);
           return { dryRun: true, ok: true, gravado: false, estado };
         }
 
         await setAsync(`var b=document.getElementById("btnSalvar_input"); if(b) b.click();`);
         await page.waitForTimeout(4000);
         validacao = await frame.evaluate(() => [...(window.Page_Validators || [])].filter((v) => v.isvalid === false).map((v) => (v.textContent || "").replace(/\s+/g, " ").trim()).filter(Boolean).join(" | ") || null).catch(() => null);
+        // O aviso de SLA não é validador nem dialog: aparece no topo da tela e nada é gravado.
+        const textoTela = await frame.evaluate(() => [document.body.innerText, ...[...document.querySelectorAll("textarea")].map((t) => t.value)].join("\n")).catch(() => "");
+        if (isSlaBlockMessage(textoTela)) {
+          throw new Error(`Chamado ${id} não salvo: SLA acima de 100% exige justificativaSla. Nada foi gravado.`);
+        }
       } finally {
         await page.close();
       }
